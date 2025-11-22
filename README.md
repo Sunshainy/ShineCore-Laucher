@@ -28,19 +28,19 @@
 ## 📸 Интерфейс
 
 ### 🏠 Главный экран
-<!-- INSERT_IMAGE: main-interface.png -->
+<img width="1199" height="747" alt="image" src="https://github.com/user-attachments/assets/e5e26746-c093-4ec1-a267-f0824f7617ba" />
 *Элегантный интерфейс с анимированным фоном и интуитивной навигацией*
 
 ### 🎯 Приветственный экран
-<!-- INSERT_IMAGE: welcome-screen.png -->
+<img width="1198" height="746" alt="image" src="https://github.com/user-attachments/assets/93f798bf-152d-47b7-9c3a-1b1b73922952" />
 *Многоязычное приветствие с плавными анимациями перехода*
 
 ### ⚙️ Настройки
-<!-- INSERT_IMAGE: settings-panel.png -->
+<img width="1199" height="745" alt="image" src="https://github.com/user-attachments/assets/302d9d4b-b5d3-4846-a38b-59ee89a1c16b" />
 *Комплексная панель настроек с возможностью кастомизации*
 
 ### 📊 Прогресс загрузки
-<!-- INSERT_IMAGE: download-progress.png -->
+<img width="1199" height="748" alt="image" src="https://github.com/user-attachments/assets/c67a0c64-6027-450c-baf6-2d68e2357012" />
 *Детальное отображение прогресса загрузки и установки*
 
 ---
