@@ -1,9 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-// Логирование
-console.log('Logger module loaded');
-
+/**
+ * Система логирования для лаунчера
+ * Записывает логи в файл и консоль
+ */
 class Logger {
     constructor(minecraftDir) {
         this.logsDir = path.join(minecraftDir, 'logs');

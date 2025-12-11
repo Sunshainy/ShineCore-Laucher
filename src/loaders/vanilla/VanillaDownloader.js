@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const Logger = require('./logger');
-const DownloadUtil = require('./download-util');
-const VanillaIntegrity = require('./vanilla-integrity');
+const Logger = require('../../utils/Logger');
+const DownloadUtil = require('../../utils/DownloadUtil');
+const VanillaIntegrity = require('./VanillaIntegrity');
 
 // Логирование
 console.log('VanillaDownloader module loaded');
@@ -15,6 +15,8 @@ class VanillaDownloader {
         this.downloader = new DownloadUtil(this.logger);
         this.integrity = new VanillaIntegrity(minecraftDir, progressCallback);
         this.progressCallback = progressCallback;
+        this.cacheDir = path.join(this.minecraftDir, 'cache');
+        this.ensureDir(this.cacheDir);
         
         // Счетчики для прогресса
         this.totalSteps = 0;
@@ -38,9 +40,39 @@ class VanillaDownloader {
     }
 
     async getVersionManifest() {
+        const cacheFile = path.join(this.cacheDir, 'version_manifest_v2.json');
+        const cacheTtlMs = 6 * 60 * 60 * 1000; // 6 часов
+
+        try {
+            const cached = this.readJsonSafe(cacheFile);
+            if (cached && cached.fetchedAt && (Date.now() - cached.fetchedAt) < cacheTtlMs && Array.isArray(cached.versions)) {
+                return cached.versions;
+            }
+        } catch (_) {
+            // игнорируем ошибки кеша
+        }
+
         console.log('Загрузка манифеста версий...');
         this.logger.info('Fetching version manifest');
-        return (await this.downloader.fetchJson(this.manifestUrl)).versions;
+        const manifest = await this.downloader.fetchJson(this.manifestUrl, cacheTtlMs);
+
+        try {
+            fs.writeFileSync(cacheFile, JSON.stringify({ fetchedAt: Date.now(), versions: manifest.versions }, null, 2));
+        } catch (e) {
+            this.logger.warn('Failed to write manifest cache', e.message || e);
+        }
+
+        return manifest.versions;
+    }
+
+    readJsonSafe(filePath) {
+        if (!fs.existsSync(filePath)) return null;
+        try {
+            return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        } catch (err) {
+            this.logger.warn('Failed to read cache file', err.message || err);
+            return null;
+        }
     }
 
     async downloadVersion(versionInfo) {

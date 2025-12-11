@@ -2,8 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const DownloadUtil = require('./download-util');
-const Logger = require('./logger');
+const DownloadUtil = require('../../utils/DownloadUtil');
+const Logger = require('../../utils/Logger');
 
 // Логирование
 console.log('VanillaIntegrity module loaded');

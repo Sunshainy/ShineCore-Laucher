@@ -44,8 +44,7 @@ class DebugConsole {
         // Обработка сообщений от основного процесса
         if (window.electronAPI && window.electronAPI.onConsoleLog) {
             window.electronAPI.onConsoleLog((logData) => {
-                console.log('Received log from main process:', logData);
-                this.addLog(logData.level, logData.message, logData.timestamp);
+                this.addLog(logData.level, logData.message, logData.timestamp, logData.source);
             });
         } else {
             console.error('Electron API not available for console logging');
@@ -62,12 +61,13 @@ class DebugConsole {
         }
     }
 
-    addLog(level, message, timestamp = new Date()) {
+    addLog(level, message, timestamp = new Date(), source = 'main') {
         const logEntry = {
             id: Date.now() + Math.random(),
             level: level,
             message: this.ensureUtf8(message),
             timestamp: timestamp,
+            source,
             visible: this.filters[level]
         };
 
@@ -107,8 +107,9 @@ class DebugConsole {
         
         logElement.className = `log-entry new`;
         logElement.innerHTML = `
-            <span class="log-timestamp">${logEntry.timestamp.toLocaleTimeString('ru-RU')}</span>
+            <span class="log-timestamp">${new Date(logEntry.timestamp).toLocaleTimeString('ru-RU')}</span>
             <span class="log-level ${logEntry.level}">${logEntry.level.toUpperCase()}</span>
+            <span class="log-level source">${this.escapeHtml(logEntry.source || '')}</span>
             <span class="log-message">${this.escapeHtml(logEntry.message)}</span>
         `;
 
@@ -172,7 +173,7 @@ class DebugConsole {
 
     copyLogs() {
         const logText = this.logs.map(log => 
-            `[${log.timestamp.toLocaleString('ru-RU')}] ${log.level.toUpperCase()}: ${log.message}`
+            `[${new Date(log.timestamp).toLocaleString('ru-RU')}] ${log.source || 'main'} ${log.level.toUpperCase()}: ${log.message}`
         ).join('\n');
 
         navigator.clipboard.writeText(logText).then(() => {
@@ -184,7 +185,7 @@ class DebugConsole {
 
     exportLogs() {
         const logText = this.logs.map(log => 
-            `[${log.timestamp.toLocaleString('ru-RU')}] ${log.level.toUpperCase()}: ${log.message}`
+            `[${new Date(log.timestamp).toLocaleString('ru-RU')}] ${log.source || 'main'} ${log.level.toUpperCase()}: ${log.message}`
         ).join('\n');
 
         const blob = new Blob([logText], { type: 'text/plain;charset=utf-8' });

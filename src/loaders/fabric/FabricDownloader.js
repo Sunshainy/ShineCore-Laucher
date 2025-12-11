@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const Logger = require('./logger');
-const DownloadUtil = require('./download-util');
+const Logger = require('../../utils/Logger');
+const DownloadUtil = require('../../utils/DownloadUtil');
 
 // Логирование
 console.log('FabricDownloader module loaded');

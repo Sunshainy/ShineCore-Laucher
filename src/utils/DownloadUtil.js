@@ -1,13 +1,13 @@
-// download-util.js
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
 const https = require('https');
 const crypto = require('crypto');
 
-// Логирование
-console.log('DownloadUtil module loaded');
-
+/**
+ * Утилиты для загрузки файлов
+ * Поддерживает параллельную загрузку, retry, проверку SHA1
+ */
 class DownloadUtil {
     constructor(logger) {
         this.logger = logger || {
@@ -17,12 +17,16 @@ class DownloadUtil {
         };
         this.maxRetries = 3;
         this.retryDelay = 1000;
+        this.jsonCache = new Map();
     }
 
     _getRequestModule(url) {
         return url.startsWith('https://') ? https : http;
     }
 
+    /**
+     * Загрузка файла с повторными попытками
+     */
     async downloadFileWithRetry(url, filePath, expectedSha1 = null) {
         if (fs.existsSync(filePath) && expectedSha1) {
             const hash = await this.calculateSha1(filePath);
@@ -46,6 +50,9 @@ class DownloadUtil {
         }
     }
 
+    /**
+     * Загрузка одного файла
+     */
     downloadFile(url, filePath) {
         return new Promise((resolve, reject) => {
             this.ensureDir(path.dirname(filePath));
@@ -77,7 +84,9 @@ class DownloadUtil {
         });
     }
 
-    // ВОТ ЭТОТ МЕТОД БЫЛ ПОТЕРЯН — ВОЗВРАЩАЕМ!
+    /**
+     * Параллельная загрузка файлов
+     */
     async downloadParallel(files, concurrency = 8, onProgress = null) {
         let completed = 0;
         const total = files.length;
@@ -98,8 +107,8 @@ class DownloadUtil {
                         onProgress(completed, total, file);
                     }
                 } catch (error) {
-                    this.logger.error(`Failed: ${file.name || path.basename(file.path)}`, error);
-                    failed.push(file);
+                    this.logger.error(`Failed to download: ${file.name || path.basename(file.path)}`, error);
+                    failed.push({ file, error: error.message });
                 }
             }
         };
@@ -109,62 +118,75 @@ class DownloadUtil {
         }
 
         await Promise.all(workers);
+
         return { completed, total, failed };
     }
 
-    async fetchJson(url) {
-        for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
-            try {
-                const data = await this._fetchJson(url);
-                return data;
-            } catch (error) {
-                this.logger.warn(`JSON fetch failed (${attempt}/${this.maxRetries}): ${url}`);
-                if (attempt === this.maxRetries) throw error;
-                await this.sleep(this.retryDelay * attempt);
+    /**
+     * Загрузка JSON с автоматическим парсингом
+     */
+    async fetchJson(url, cacheTtlMs = 300000) {
+        // Легкий in-memory cache для снижения сетевых запросов
+        if (cacheTtlMs > 0) {
+            const cached = this.jsonCache.get(url);
+            if (cached && cached.expires > Date.now()) {
+                return cached.data;
             }
         }
-    }
 
-    _fetchJson(url) {
-        return new Promise((resolve, reject) => {
+        const data = await new Promise((resolve, reject) => {
             const client = this._getRequestModule(url);
-
             client.get(url, { timeout: 30000 }, (response) => {
                 if ([301, 302, 307, 308].includes(response.statusCode) && response.headers.location) {
-                    return this._fetchJson(response.headers.location).then(resolve).catch(reject);
+                    return this.fetchJson(response.headers.location, cacheTtlMs).then(resolve).catch(reject);
                 }
 
                 if (response.statusCode !== 200) {
                     return reject(new Error(`HTTP ${response.statusCode} for ${url}`));
                 }
 
-                let data = '';
-                response.on('data', chunk => data += chunk);
+                let raw = '';
+                response.on('data', (chunk) => raw += chunk);
                 response.on('end', () => {
                     try {
-                        resolve(JSON.parse(data));
-                    } catch (e) {
-                        reject(new Error(`JSON parse error: ${e.message}`));
+                        resolve(JSON.parse(raw));
+                    } catch (error) {
+                        reject(new Error(`Invalid JSON from ${url}: ${error.message}`));
                     }
                 });
             }).on('error', reject);
         });
+
+        if (cacheTtlMs > 0) {
+            this.jsonCache.set(url, { data, expires: Date.now() + cacheTtlMs });
+        }
+
+        return data;
     }
 
-    async calculateSha1(filePath) {
+    /**
+     * Вычисление SHA1 хеша файла
+     */
+    calculateSha1(filePath) {
         return new Promise((resolve, reject) => {
             const hash = crypto.createHash('sha1');
             const stream = fs.createReadStream(filePath);
-            stream.on('data', d => hash.update(d));
+            stream.on('data', (data) => hash.update(data));
             stream.on('end', () => resolve(hash.digest('hex')));
             stream.on('error', reject);
         });
     }
 
+    /**
+     * Вспомогательная функция для задержки
+     */
     sleep(ms) {
-        return new Promise(r => setTimeout(r, ms));
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    /**
+     * Создание директории если не существует
+     */
     ensureDir(dir) {
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });

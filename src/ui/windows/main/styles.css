@@ -21,6 +21,21 @@
   font-weight: 600;
 }
 
+.version-badge.compact {
+  background: rgba(0, 200, 100, 0.15);
+  color: #38d873;
+  border: 1px solid rgba(56, 216, 115, 0.4);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+ }
+
 /* === Стили для управления фоном === */
 .background-controls {
   display: flex;

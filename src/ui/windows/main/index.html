@@ -425,7 +425,10 @@ html, body {
 
   .version-selector {
     position: relative;
-    display: inline-block;
+    display: inline-flex;
+    flex-direction: column;
+    min-width: 220px;
+    max-width: 280px;
   }
 
   .version-dropdown {
@@ -433,15 +436,19 @@ html, body {
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text);
-    padding: 6px 12px;
-    font-size: 0.85rem;
+    padding: 8px 12px;
+    font-size: 0.9rem;
     cursor: pointer;
-    min-width: 160px;
+    min-width: 100%;
     transition: all 0.2s ease;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    text-align: center;
+    text-align: left;
+    gap: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .version-dropdown:hover {
@@ -453,14 +460,15 @@ html, body {
     position: absolute;
     top: 100%;
     left: 0;
-    right: 0;
+    width: 100%;
     background: rgba(18, 25, 32, 0.95);
     backdrop-filter: blur(20px);
     border: 1px solid var(--border);
     border-top: none;
-    border-radius: 0 0 6px 6px;
-    max-height: 200px;
+    border-radius: 0 0 8px 8px;
+    max-height: 260px;
     overflow-y: auto;
+    overflow-x: hidden;
     z-index: 1000;
     display: none;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
@@ -471,8 +479,8 @@ html, body {
   }
 
   .version-item {
-    padding: 8px 12px;
-    font-size: 0.85rem;
+    padding: 10px 12px;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: background 0.2s ease;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -480,6 +488,7 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
   }
 
   .version-item:hover {
@@ -496,6 +505,9 @@ html, body {
 
   .version-item-text {
     flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .version-badge {
@@ -837,7 +849,7 @@ html, body {
   <div class="app">
     <!-- Стандартный видео фон -->
     <video class="background-video" autoplay muted loop>
-      <source src="../assets/background.webm" type="video/webm">
+      <source src="../../../assets/background.webm" type="video/webm">
     </video>
     
     <!-- Пользовательский фон (изображение или видео) -->
@@ -876,7 +888,7 @@ html, body {
       <div class="sidebar">
         <div class="sidebar-header">
           <div class="logo">
-            <img src="../assets/logo.svg" alt="Logo" width="24" height="24">
+            <img src="../../../assets/logo.svg" alt="Logo" width="24" height="24">
             <span>ShineCore</span>
           </div>
         </div>
@@ -1245,7 +1257,7 @@ html, body {
     }
   </style>
 
-  <script src="renderer.js"></script>
+  <script type="module" src="renderer/index.js"></script>
   <script src="update-notification.js"></script>
 
   <script>

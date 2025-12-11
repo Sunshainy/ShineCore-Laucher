@@ -2,8 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const DownloadUtil = require('./download-util');
-const Logger = require('./logger');
+const DownloadUtil = require('../utils/DownloadUtil');
+const Logger = require('../utils/Logger');
 
 // Логирование
 console.log('ModpackManager module loaded');
@@ -37,8 +37,8 @@ class ModpackManager {
             this.sendProgress('Удаление лишних файлов', 2, 4);
             await this.cleanupExtraFiles(manifest.files, integrityCheck.missing);
             
-            // 3. Дозагрузка поврежденных и отсутствующих файлов
-            this.sendProgress('Дозагрузка файлов', 3, 4);
+            // 3. Загрузка поврежденных и отсутствующих файлов
+            this.sendProgress('Загрузка файлов', 3, 4);
             await this.downloadMissingFiles(integrityCheck, manifest.files, baseUrl);
             
             // 4. Финальная проверка

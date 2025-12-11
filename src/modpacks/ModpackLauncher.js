@@ -2,13 +2,13 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const DownloadUtil = require('./download-util');
-const Logger = require('./logger');
-const VanillaDownloader = require('./vanilla-downloader');
-const FabricDownloader = require('./fabric-downloader');
-const GameLauncher = require('./game-launcher');
-const ModpackManager = require('./modpack-manager');
-const JavaManager = require('./java-manager');
+const DownloadUtil = require('../utils/DownloadUtil');
+const Logger = require('../utils/Logger');
+const VanillaDownloader = require('../loaders/vanilla/VanillaDownloader');
+const FabricDownloader = require('../loaders/fabric/FabricDownloader');
+const GameLauncher = require('../game/GameLauncher');
+const ModpackManager = require('./ModpackManager');
+const JavaManager = require('../game/JavaManager');
 
 // Логирование
 console.log('ModpackLauncher module loaded');

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn, spawnSync } = require('child_process');
-const DownloadUtil = require('./download-util');
+const DownloadUtil = require('../utils/DownloadUtil');
 const AdmZip = require('adm-zip');
 
 class JavaManager {

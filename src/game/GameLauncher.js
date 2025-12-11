@@ -2,10 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 const os = require('os');
-const JavaManager = require('./java-manager');
-
-// Логирование
-console.log('GameLauncher module loaded');
+const JavaManager = require('./JavaManager');
 
 class GameLauncher {
     constructor(minecraftDir) {
