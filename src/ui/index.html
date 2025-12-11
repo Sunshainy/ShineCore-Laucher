@@ -913,17 +913,20 @@ html, body {
     <div class="update-modal-overlay"></div>
     <div class="update-modal-content">
       <div class="update-modal-header">
-        <h2 id="updateTitle">Проверка обновлений...</h2>
+        <h2 id="updateTitle">🔄 Проверка обновлений...</h2>
       </div>
       <div class="update-modal-body">
         <div id="updateText" class="update-text">
           Подождите, идет проверка новых версий...
         </div>
         <div id="updateProgress" class="update-progress" style="display: none;">
-          <div class="update-progress-bar">
-            <div id="updateProgressBar" class="update-progress-fill"></div>
+          <div class="update-stage-text" id="updateStageText">Загрузка...</div>
+          <div class="update-progress-container">
+            <div class="update-progress-bar">
+              <div id="updateProgressBar" class="update-progress-fill"></div>
+            </div>
+            <div id="updateProgressPercent" class="update-progress-percent">0%</div>
           </div>
-          <div id="updateProgressPercent" class="update-progress-percent">0%</div>
         </div>
       </div>
       <div class="update-modal-footer">
@@ -956,9 +959,9 @@ html, body {
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(10px);
-      animation: fadeIn 0.2s ease-out;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      animation: fadeIn 0.3s ease-out;
     }
 
     @keyframes fadeIn {
@@ -968,31 +971,46 @@ html, body {
 
     .update-modal-content {
       position: relative;
-      background: linear-gradient(135deg, #1a2332 0%, #121920 100%);
-      border-radius: 16px;
-      border: 1px solid rgba(42, 178, 123, 0.3);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      background: linear-gradient(135deg, rgba(18, 25, 32, 0.98) 0%, rgba(11, 15, 20, 0.98) 100%);
+      border-radius: 20px;
+      border: 1px solid rgba(42, 178, 123, 0.2);
+      box-shadow: 
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 25px 80px rgba(0, 0, 0, 0.6),
+        0 0 120px rgba(42, 178, 123, 0.15);
       width: 90%;
-      max-width: 500px;
+      max-width: 520px;
       padding: 0;
-      transform: scale(0.9);
+      transform: scale(0.9) translateY(-20px);
       opacity: 0;
-      transition: all 0.2s ease-out;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .update-modal.show .update-modal-content {
-      transform: scale(1);
+      transform: scale(1) translateY(0);
       opacity: 1;
     }
 
     .update-modal-header {
-      padding: 24px 28px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 28px 32px 20px;
+      border-bottom: 1px solid rgba(42, 178, 123, 0.15);
+      position: relative;
+    }
+
+    .update-modal-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.6;
     }
 
     .update-modal-header h2 {
       margin: 0;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
       font-weight: 600;
       color: var(--text);
       display: flex;
@@ -1001,28 +1019,34 @@ html, body {
     }
 
     .update-modal-body {
-      padding: 24px 28px;
+      padding: 28px 32px;
     }
 
     .update-text {
       color: var(--sub);
-      line-height: 1.6;
+      line-height: 1.7;
+      font-size: 1rem;
     }
 
     .update-info {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
     .update-version {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       color: var(--text);
+      padding: 12px 16px;
+      background: rgba(42, 178, 123, 0.08);
+      border-radius: 10px;
+      border-left: 3px solid var(--accent);
     }
 
     .update-version strong {
       color: var(--accent);
       font-weight: 700;
+      text-shadow: 0 0 20px rgba(42, 178, 123, 0.3);
     }
 
     .update-description {
@@ -1033,7 +1057,7 @@ html, body {
     .update-downloading {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
     .download-details {
@@ -1041,21 +1065,26 @@ html, body {
       justify-content: space-between;
       font-size: 0.9rem;
       color: var(--sub);
-      margin-top: 8px;
+      margin-top: 10px;
+      padding: 10px 14px;
+      background: rgba(42, 178, 123, 0.05);
+      border-radius: 8px;
     }
 
     .download-size {
       color: var(--text);
+      font-weight: 500;
     }
 
     .download-speed {
       color: var(--accent);
+      font-weight: 600;
     }
 
     .update-ready {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
     .update-ready p:first-child {
@@ -1066,12 +1095,13 @@ html, body {
     .update-ready strong {
       color: var(--success);
       font-weight: 700;
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
     }
 
     .update-error {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
 
     .update-error p:first-child {
@@ -1080,31 +1110,93 @@ html, body {
     }
 
     .error-message {
-      padding: 12px;
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 8px;
-      color: var(--error);
+      padding: 14px;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: 10px;
+      color: #ff6b6b;
       font-size: 0.9rem;
       font-family: 'Courier New', monospace;
+      max-height: 120px;
+      overflow-y: auto;
     }
 
-    /* Прогресс-бар */
+    /* Прогресс-бар в стиле лаунчера */
     .update-progress {
-      margin-top: 20px;
+      margin-top: 24px;
+    }
+
+    .update-stage-text {
+      font-size: 0.9rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .update-progress-container {
+      display: flex;
+      align-items: center;
+      gap: 14px;
     }
 
     .update-progress-bar {
-      width: 100%;
-      height: 8px;
-      background: var(--progress-bg);
-      border-radius: 4px;
+      flex: 1;
+      height: 10px;
+      background: rgba(42, 178, 123, 0.1);
+      border-radius: 10px;
       overflow: hidden;
       position: relative;
+      border: 1px solid rgba(42, 178, 123, 0.2);
     }
 
     .update-progress-fill {
       height: 100%;
+      background: linear-gradient(90deg, 
+        var(--accent) 0%, 
+        #3cd68f 50%, 
+        var(--accent) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite;
+      border-radius: 10px;
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 20px rgba(42, 178, 123, 0.4);
+      position: relative;
+    }
+
+    .update-progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(to bottom, 
+        rgba(255, 255, 255, 0.3), 
+        transparent);
+      border-radius: 10px 10px 0 0;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .update-progress-percent {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 48px;
+      text-align: right;
+      text-shadow: 0 0 10px rgba(42, 178, 123, 0.5);
+    }
+
+    /* Модальный футер */
+    .update-modal-footer {
+      padding: 20px 32px 28px;
+      border-top: 1px solid rgba(42, 178, 123, 0.1);
+    }
       background: linear-gradient(90deg, var(--accent), var(--progress-fill));
       border-radius: 4px;
       transition: width 0.3s ease-out;
@@ -1149,52 +1241,105 @@ html, body {
 
     #updateButtons {
       display: flex;
-      gap: 12px;
+      gap: 14px;
       justify-content: flex-end;
+      flex-wrap: wrap;
     }
 
     .update-btn {
-      padding: 12px 24px;
+      padding: 14px 28px;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       font-family: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .update-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .update-btn:hover::before {
+      width: 300px;
+      height: 300px;
     }
 
     .update-btn-primary {
-      background: linear-gradient(135deg, var(--accent), #22c55e);
+      background: linear-gradient(135deg, var(--accent) 0%, #22c55e 100%);
       color: white;
-      box-shadow: 0 4px 12px rgba(42, 178, 123, 0.3);
+      box-shadow: 
+        0 6px 20px rgba(42, 178, 123, 0.35),
+        0 0 0 1px rgba(42, 178, 123, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      position: relative;
+    }
+
+    .update-btn-primary span {
+      position: relative;
+      z-index: 1;
     }
 
     .update-btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(42, 178, 123, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 
+        0 8px 25px rgba(42, 178, 123, 0.45),
+        0 0 0 1px rgba(42, 178, 123, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 0 40px rgba(42, 178, 123, 0.3);
     }
 
     .update-btn-primary:active {
-      transform: translateY(0);
+      transform: translateY(-1px);
+      box-shadow: 
+        0 4px 15px rgba(42, 178, 123, 0.35),
+        0 0 0 1px rgba(42, 178, 123, 0.2);
     }
 
     .update-btn-secondary {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
       color: var(--text);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    .update-btn-secondary span {
+      position: relative;
+      z-index: 1;
     }
 
     .update-btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .update-btn-secondary:active {
+      transform: translateY(0);
     }
 
     .update-btn-icon {
       font-size: 1.2rem;
+      position: relative;
+      z-index: 1;
     }
   </style>
 

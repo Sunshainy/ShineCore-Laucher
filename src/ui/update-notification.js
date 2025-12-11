@@ -80,7 +80,7 @@ class UpdateNotification {
 
   showUpdateAvailable(info) {
     this.newVersion = info.version;
-    this.modalTitle.textContent = '🎉 Доступна новая версия!';
+    this.modalTitle.textContent = '🎉 Доступно обновление!';
     this.modalText.innerHTML = `
       <div class="update-info">
         <p class="update-version">Версия <strong>${info.version}</strong> готова к установке</p>
@@ -88,13 +88,16 @@ class UpdateNotification {
       </div>
     `;
 
+    document.getElementById('updateProgress').style.display = 'none';
+
     this.modalButtons.innerHTML = `
+      <button class="update-btn update-btn-secondary" id="updateLaterBtn">
+        <span class="update-btn-icon">⏭️</span>
+        <span>Позже</span>
+      </button>
       <button class="update-btn update-btn-primary" id="updateNowBtn">
         <span class="update-btn-icon">⬇️</span>
-        Обновить сейчас
-      </button>
-      <button class="update-btn update-btn-secondary" id="updateLaterBtn">
-        Позже
+        <span>Обновить сейчас</span>
       </button>
     `;
 
@@ -139,6 +142,12 @@ class UpdateNotification {
       this.progressPercent.textContent = `${percent}%`;
     }
 
+    // Обновляем текст этапа
+    const stageText = document.getElementById('updateStageText');
+    if (stageText) {
+      stageText.textContent = 'Скачивание обновления...';
+    }
+
     // Обновляем текст с деталями
     const transferred = this.formatBytes(progress.transferred);
     const total = this.formatBytes(progress.total);
@@ -168,12 +177,13 @@ class UpdateNotification {
     document.getElementById('updateProgress').style.display = 'none';
 
     this.modalButtons.innerHTML = `
+      <button class="update-btn update-btn-secondary" id="restartLaterBtn">
+        <span class="update-btn-icon">⏭️</span>
+        <span>Позже</span>
+      </button>
       <button class="update-btn update-btn-primary" id="restartNowBtn">
         <span class="update-btn-icon">🔄</span>
-        Перезапустить сейчас
-      </button>
-      <button class="update-btn update-btn-secondary" id="restartLaterBtn">
-        Позже
+        <span>Перезапустить</span>
       </button>
     `;
 
@@ -194,7 +204,7 @@ class UpdateNotification {
 
     this.modalButtons.innerHTML = `
       <button class="update-btn update-btn-secondary" id="closeErrorBtn">
-        Закрыть
+        <span>Закрыть</span>
       </button>
     `;
 
