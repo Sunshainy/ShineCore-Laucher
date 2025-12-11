@@ -59,5 +59,23 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Отправка логов из рендерера в основной процесс
   sendConsoleLog: (logData) => {
     ipcRenderer.send('console-log-from-renderer', logData);
+  },
+
+  // === Автообновление ===
+  checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+  startUpdateDownload: () => ipcRenderer.invoke('start-update-download'),
+  quitAndInstall: () => ipcRenderer.send('quit-and-install'),
+  
+  onUpdateAvailable: (callback) => {
+    ipcRenderer.on('update-available', (e, info) => callback(info));
+  },
+  onUpdateDownloadProgress: (callback) => {
+    ipcRenderer.on('update-download-progress', (e, progress) => callback(progress));
+  },
+  onUpdateDownloaded: (callback) => {
+    ipcRenderer.on('update-downloaded', () => callback());
+  },
+  onUpdateError: (callback) => {
+    ipcRenderer.on('update-error', (e, error) => callback(error));
   }
 });

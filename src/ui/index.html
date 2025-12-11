@@ -908,7 +908,298 @@ html, body {
     </div>
   </div>
 
+  <!-- Модальное окно обновлений -->
+  <div id="updateModal" class="update-modal">
+    <div class="update-modal-overlay"></div>
+    <div class="update-modal-content">
+      <div class="update-modal-header">
+        <h2 id="updateTitle">Проверка обновлений...</h2>
+      </div>
+      <div class="update-modal-body">
+        <div id="updateText" class="update-text">
+          Подождите, идет проверка новых версий...
+        </div>
+        <div id="updateProgress" class="update-progress" style="display: none;">
+          <div class="update-progress-bar">
+            <div id="updateProgressBar" class="update-progress-fill"></div>
+          </div>
+          <div id="updateProgressPercent" class="update-progress-percent">0%</div>
+        </div>
+      </div>
+      <div class="update-modal-footer">
+        <div id="updateButtons"></div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* === Стили модального окна обновлений === */
+    .update-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .update-modal.show {
+      display: flex;
+    }
+
+    .update-modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(10px);
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .update-modal-content {
+      position: relative;
+      background: linear-gradient(135deg, #1a2332 0%, #121920 100%);
+      border-radius: 16px;
+      border: 1px solid rgba(42, 178, 123, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      width: 90%;
+      max-width: 500px;
+      padding: 0;
+      transform: scale(0.9);
+      opacity: 0;
+      transition: all 0.2s ease-out;
+    }
+
+    .update-modal.show .update-modal-content {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .update-modal-header {
+      padding: 24px 28px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .update-modal-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .update-modal-body {
+      padding: 24px 28px;
+    }
+
+    .update-text {
+      color: var(--sub);
+      line-height: 1.6;
+    }
+
+    .update-info {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .update-version {
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+
+    .update-version strong {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .update-description {
+      font-size: 0.95rem;
+      color: var(--sub);
+    }
+
+    .update-downloading {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .download-details {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--sub);
+      margin-top: 8px;
+    }
+
+    .download-size {
+      color: var(--text);
+    }
+
+    .download-speed {
+      color: var(--accent);
+    }
+
+    .update-ready {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .update-ready p:first-child {
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+
+    .update-ready strong {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .update-error {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .update-error p:first-child {
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+
+    .error-message {
+      padding: 12px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      color: var(--error);
+      font-size: 0.9rem;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Прогресс-бар */
+    .update-progress {
+      margin-top: 20px;
+    }
+
+    .update-progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--progress-bg);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .update-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--progress-fill));
+      border-radius: 4px;
+      transition: width 0.3s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .update-progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+      );
+      animation: shimmer 1.5s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .update-progress-percent {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* Кнопки */
+    .update-modal-footer {
+      padding: 20px 28px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #updateButtons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .update-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+    }
+
+    .update-btn-primary {
+      background: linear-gradient(135deg, var(--accent), #22c55e);
+      color: white;
+      box-shadow: 0 4px 12px rgba(42, 178, 123, 0.3);
+    }
+
+    .update-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(42, 178, 123, 0.4);
+    }
+
+    .update-btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .update-btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .update-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .update-btn-icon {
+      font-size: 1.2rem;
+    }
+  </style>
+
   <script src="renderer.js"></script>
+  <script src="update-notification.js"></script>
 
   <script>
     // === Анимация приветствия ===

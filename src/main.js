@@ -1,6 +1,12 @@
 const { app, BrowserWindow, ipcMain, shell, dialog, Tray, Menu } = require('electron');
+const { autoUpdater } = require('electron-updater');
+const log = require('electron-log');
 const path = require('path');
 const fs = require('fs');
+
+// Настройка логирования
+log.transports.file.level = 'info';
+autoUpdater.logger = log;
 
 // Устанавливаем правильную кодировку для консоли на Windows
 if (process.platform === 'win32') {
@@ -26,12 +32,27 @@ let mainProcess; // Объявляем переменную, но не иниц�
 
 // Обработчик второго экземпляра
 app.on('second-instance', () => {
-  if (mainProcess && mainProcess.mainWindow) {
-    if (mainProcess.mainWindow.isMinimized()) {
-      mainProcess.mainWindow.restore();
+  try {
+    if (mainProcess && mainProcess.mainWindow && !mainProcess.mainWindow.isDestroyed()) {
+      if (mainProcess.mainWindow.isMinimized()) {
+        mainProcess.mainWindow.restore();
+      }
+      mainProcess.mainWindow.show();
+      mainProcess.mainWindow.focus();
     }
-    mainProcess.mainWindow.show();
-    mainProcess.mainWindow.focus();
+  } catch (err) {
+    console.error('Error in second-instance handler:', err.message);
+  }
+});
+
+// Обработчик для очистки перед выходом
+app.on('before-quit', () => {
+  try {
+    if (mainProcess && mainProcess.mainWindow && !mainProcess.mainWindow.isDestroyed()) {
+      mainProcess.mainWindow.webContents.session.clearCache().catch(() => {});
+    }
+  } catch (err) {
+    console.error('Error in before-quit handler:', err);
   }
 });
 
@@ -72,6 +93,7 @@ class MainProcess {
     
     this.setupIPC();
     this.interceptConsoleLogs();
+    this.setupAutoUpdater();
     
     // Добавляем логирование запуска
     console.log('=== ShineCore Launcher Started ===');
@@ -124,7 +146,109 @@ class MainProcess {
   if (process.env.NODE_ENV === 'development') {
     this.mainWindow.webContents.openDevTools();
   }
+
+  // Обработчик закрытия окна
+  this.mainWindow.on('closed', () => {
+    console.log('Main window closed, cleaning up references');
+    this.mainWindow = null;
+  });
+
+  // Обработчик для перехвата попытки закрытия
+  this.mainWindow.on('close', (event) => {
+    // Предотвращаем закрытие окна - вместо этого скрываем его
+    if (this.minecraftProcesses.size === 0) {
+      // Если Minecraft не запущен, разрешаем закрытие
+      // иначе скрываем окно
+    } else {
+      // Если Minecraft запущен, скрываем окно
+      event.preventDefault();
+      this.mainWindow.hide();
+    }
+  });
 }
+
+  setupAutoUpdater() {
+    // Настройка автообновления
+    autoUpdater.autoDownload = false; // Не скачиваем автоматически, спрашиваем пользователя
+    autoUpdater.autoInstallOnAppQuit = false; // Не устанавливаем при выходе автоматически
+
+    console.log('Setting up auto-updater...');
+    console.log('Current version:', app.getVersion());
+
+    // Событие: проверка обновлений
+    autoUpdater.on('checking-for-update', () => {
+      console.log('Checking for update...');
+    });
+
+    // Событие: обновление доступно
+    autoUpdater.on('update-available', (info) => {
+      console.log('Update available:', info.version);
+      console.log('Release notes:', info.releaseNotes);
+      
+      // Отправляем в рендерер вместо системного диалога
+      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+        this.mainWindow.webContents.send('update-available', {
+          version: info.version,
+          releaseNotes: info.releaseNotes,
+          releaseDate: info.releaseDate
+        });
+      }
+    });
+
+    // Событие: обновление недоступно
+    autoUpdater.on('update-not-available', (info) => {
+      console.log('Update not available. Current version is:', info.version);
+    });
+
+    // Событие: ошибка при обновлении
+    autoUpdater.on('error', (err) => {
+      console.error('Auto-updater error:', err);
+      
+      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+        this.mainWindow.webContents.send('update-error', err.message || 'Ошибка автообновления');
+      }
+    });
+
+    // Событие: прогресс загрузки
+    autoUpdater.on('download-progress', (progressObj) => {
+      const logMessage = `Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent}% (${progressObj.transferred}/${progressObj.total})`;
+      console.log(logMessage);
+      
+      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+        this.mainWindow.webContents.send('update-download-progress', {
+          percent: progressObj.percent,
+          bytesPerSecond: progressObj.bytesPerSecond,
+          transferred: progressObj.transferred,
+          total: progressObj.total
+        });
+      }
+    });
+
+    // Событие: обновление скачано
+    autoUpdater.on('update-downloaded', (info) => {
+      console.log('Update downloaded:', info.version);
+      
+      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+        this.mainWindow.webContents.send('update-downloaded');
+      }
+    });
+
+    // Автоматическая проверка обновлений при запуске (через 5 секунд)
+    setTimeout(() => {
+      console.log('Starting automatic update check...');
+      autoUpdater.checkForUpdates().catch(err => {
+        console.error('Auto-update check failed:', err);
+      });
+    }, 5000);
+
+    // Периодическая проверка обновлений каждые 30 минут
+    setInterval(() => {
+      console.log('Periodic update check...');
+      autoUpdater.checkForUpdates().catch(err => {
+        console.error('Periodic update check failed:', err);
+      });
+    }, 30 * 60 * 1000);
+  }
 
   setupIPC() {
     // === Управление окном ===
@@ -340,6 +464,9 @@ ipcMain.handle('download-version', async (e, { versionId }) => {
     // === Выбор файла фона ===
     ipcMain.handle('select-background-file', async () => {
       try {
+        if (!this.mainWindow || this.mainWindow.isDestroyed()) {
+          throw new Error('Окно приложения не инициализировано');
+        }
         const result = await dialog.showOpenDialog(this.mainWindow, {
           title: 'Выберите файл фона',
           filters: [
@@ -386,9 +513,13 @@ ipcMain.handle('download-version', async (e, { versionId }) => {
         await this.saveConfig(config);
         
         // Отправляем обновление всем окнам
-        if (this.mainWindow) {
+        if (this.mainWindow && !this.mainWindow.isDestroyed()) {
           console.log('Sending background-changed event to renderer');
-          this.mainWindow.webContents.send('background-changed', config.background);
+          try {
+            this.mainWindow.webContents.send('background-changed', config.background);
+          } catch (err) {
+            console.warn('Failed to send background change notification:', err.message);
+          }
         }
         
         console.log('Background set successfully');
@@ -416,8 +547,12 @@ ipcMain.handle('download-version', async (e, { versionId }) => {
         config.background = { type: 'default', path: '../assets/background.webm' };
         await this.saveConfig(config);
         
-        if (this.mainWindow) {
-          this.mainWindow.webContents.send('background-changed', config.background);
+        if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+          try {
+            this.mainWindow.webContents.send('background-changed', config.background);
+          } catch (err) {
+            console.warn('Failed to send background change notification:', err.message);
+          }
         }
         
         return { success: true };
@@ -439,6 +574,35 @@ ipcMain.handle('download-version', async (e, { versionId }) => {
       if (this.consoleWindow && !this.consoleWindow.isDestroyed()) {
         this.consoleWindow.webContents.send('console-log', logData);
       }
+    });
+
+    // === Автообновление ===
+    ipcMain.handle('check-for-updates', async () => {
+      try {
+        console.log('Manual update check requested');
+        const result = await autoUpdater.checkForUpdates();
+        return result;
+      } catch (err) {
+        console.error('Check for updates error:', err);
+        throw err;
+      }
+    });
+
+    ipcMain.handle('start-update-download', async () => {
+      try {
+        console.log('Starting update download');
+        await autoUpdater.downloadUpdate();
+      } catch (err) {
+        console.error('Download update error:', err);
+        throw err;
+      }
+    });
+
+    ipcMain.on('quit-and-install', () => {
+      console.log('Quitting and installing update');
+      // Закрываем все окна Minecraft перед обновлением
+      this.minecraftProcesses.clear();
+      autoUpdater.quitAndInstall(false, true);
     });
   }
 
@@ -739,9 +903,13 @@ ipcMain.handle('download-version', async (e, { versionId }) => {
         {
           label: 'Развернуть лаунчер',
           click: () => {
-            if (this.mainWindow) {
-              this.mainWindow.show();
-              this.mainWindow.focus();
+            try {
+              if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+                this.mainWindow.show();
+                this.mainWindow.focus();
+              }
+            } catch (err) {
+              console.error('Error showing main window from tray:', err.message);
             }
           }
         },
@@ -764,21 +932,29 @@ ipcMain.handle('download-version', async (e, { versionId }) => {
       
       // Одинарный клик по иконке трея показывает/скрывает лаунчер
       this.tray.on('click', () => {
-        if (this.mainWindow) {
-          if (this.mainWindow.isVisible()) {
-            this.mainWindow.hide();
-          } else {
-            this.mainWindow.show();
-            this.mainWindow.focus();
+        try {
+          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            if (this.mainWindow.isVisible()) {
+              this.mainWindow.hide();
+            } else {
+              this.mainWindow.show();
+              this.mainWindow.focus();
+            }
           }
+        } catch (err) {
+          console.error('Error handling tray click:', err.message);
         }
       });
       
       // Двойной клик по иконке трея открывает лаунчер
       this.tray.on('double-click', () => {
-        if (this.mainWindow) {
-          this.mainWindow.show();
-          this.mainWindow.focus();
+        try {
+          if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+            this.mainWindow.show();
+            this.mainWindow.focus();
+          }
+        } catch (err) {
+          console.error('Error handling tray double-click:', err.message);
         }
       });
       
@@ -801,6 +977,19 @@ app.whenReady().then(() => {
       mainProcess.createWindow();
     }
   });
+});
+
+// Глобальный обработчик необработанных исключений в основном процессе
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception in main process:', error);
+  console.error('Stack:', error.stack);
+  // Продолжаем работу, не выходим из приложения
+});
+
+// Обработчик необработанных Promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Продолжаем работу, не выходим из приложения
 });
 
 app.on('window-all-closed', () => {
