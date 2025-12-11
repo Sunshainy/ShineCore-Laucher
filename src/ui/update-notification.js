@@ -89,25 +89,17 @@ class UpdateNotification {
 
   showUpdateAvailable(info) {
     this.newVersion = info.version;
-    this.modalTitle.textContent = '🎉 Доступно обновление!';
+    this.modalTitle.textContent = 'Доступно обновление';
     this.modalText.innerHTML = `
-      <div class="update-info">
-        <p class="update-version">Версия <strong>${info.version}</strong> готова к установке</p>
-        <p class="update-description">Улучшения производительности и исправления ошибок</p>
-      </div>
+      <div class="version">Версия <strong>${info.version}</strong></div>
+      <div class="description">Новые функции и улучшения производительности</div>
     `;
 
     document.getElementById('updateProgress').style.display = 'none';
 
     this.modalButtons.innerHTML = `
-      <button class="update-btn update-btn-secondary" id="updateLaterBtn">
-        <span class="update-btn-icon">⏭️</span>
-        <span>Позже</span>
-      </button>
-      <button class="update-btn update-btn-primary" id="updateNowBtn">
-        <span class="update-btn-icon">⬇️</span>
-        <span>Обновить сейчас</span>
-      </button>
+      <button class="update-btn update-btn-secondary" id="updateLaterBtn">Позже</button>
+      <button class="update-btn update-btn-primary" id="updateNowBtn">Обновить сейчас</button>
     `;
 
     document.getElementById('updateNowBtn').onclick = () => this.startDownload();
@@ -122,12 +114,8 @@ class UpdateNotification {
   async startDownload() {
     console.log('Starting update download...');
     
-    this.modalTitle.textContent = '⬇️ Скачивание обновления...';
-    this.modalText.innerHTML = `
-      <div class="update-downloading">
-        <p>Пожалуйста, подождите...</p>
-      </div>
-    `;
+    this.modalTitle.textContent = 'Скачивание обновления';
+    this.modalText.innerHTML = '<div class="download-info"></div>';
     this.modalButtons.innerHTML = '';
 
     // Показываем прогресс-бар
@@ -154,12 +142,6 @@ class UpdateNotification {
       this.progressPercent.textContent = `${percent}%`;
     }
 
-    // Обновляем текст этапа
-    const stageText = document.getElementById('updateStageText');
-    if (stageText) {
-      stageText.textContent = 'Скачивание обновления...';
-    }
-
     // Обновляем текст с деталями
     const transferred = this.formatBytes(progress.transferred);
     const total = this.formatBytes(progress.total);
@@ -167,36 +149,26 @@ class UpdateNotification {
 
     if (this.modalText && progress.transferred !== undefined) {
       this.modalText.innerHTML = `
-        <div class="update-downloading">
-          <p class="download-details">
-            <span class="download-size">${transferred} / ${total}</span>
-            <span class="download-speed">${speed}/с</span>
-          </p>
+        <div class="download-info">
+          <span><strong>${transferred}</strong> / ${total}</span>
+          <span>${speed}/с</span>
         </div>
       `;
     }
   }
 
   showUpdateReady() {
-    this.modalTitle.textContent = '✅ Обновление готово!';
+    this.modalTitle.textContent = 'Обновление готово';
     this.modalText.innerHTML = `
-      <div class="update-ready">
-        <p>Версия <strong>${this.newVersion || 'новая'}</strong> успешно загружена</p>
-        <p class="update-description">Перезапустите лаунчер для установки</p>
-      </div>
+      <div class="version" style="color:#34d399;"><strong>${this.newVersion || 'новая'}</strong> загружено</div>
+      <div class="description">Перезапустите приложение для применения</div>
     `;
 
     document.getElementById('updateProgress').style.display = 'none';
 
     this.modalButtons.innerHTML = `
-      <button class="update-btn update-btn-secondary" id="restartLaterBtn">
-        <span class="update-btn-icon">⏭️</span>
-        <span>Позже</span>
-      </button>
-      <button class="update-btn update-btn-primary" id="restartNowBtn">
-        <span class="update-btn-icon">🔄</span>
-        <span>Перезапустить</span>
-      </button>
+      <button class="update-btn update-btn-secondary" id="restartLaterBtn">Позже</button>
+      <button class="update-btn update-btn-primary" id="restartNowBtn">Перезапустить</button>
     `;
 
     document.getElementById('restartNowBtn').onclick = () => this.quitAndInstall();
@@ -204,20 +176,18 @@ class UpdateNotification {
   }
 
   showUpdateError(error) {
-    this.modalTitle.textContent = '❌ Ошибка обновления';
+    this.modalTitle.textContent = 'Ошибка обновления';
     this.modalText.innerHTML = `
-      <div class="update-error">
-        <p>Не удалось загрузить обновление</p>
-        <p class="error-message">${error}</p>
+      <div class="error">
+        Не удалось загрузить файл.<br>
+        <small>${error}</small>
       </div>
     `;
 
     document.getElementById('updateProgress').style.display = 'none';
 
     this.modalButtons.innerHTML = `
-      <button class="update-btn update-btn-secondary" id="closeErrorBtn">
-        <span>Закрыть</span>
-      </button>
+      <button class="update-btn update-btn-secondary" id="closeErrorBtn">Закрыть</button>
     `;
 
     document.getElementById('closeErrorBtn').onclick = () => this.hideModal();

@@ -913,14 +913,13 @@ html, body {
     <div class="update-modal-overlay"></div>
     <div class="update-modal-content">
       <div class="update-modal-header">
-        <h2 id="updateTitle">🔄 Проверка обновлений...</h2>
+        <h2 id="updateTitle">Проверка обновлений...</h2>
       </div>
       <div class="update-modal-body">
         <div id="updateText" class="update-text">
           Подождите, идет проверка новых версий...
         </div>
         <div id="updateProgress" class="update-progress" style="display: none;">
-          <div class="update-stage-text" id="updateStageText">Загрузка...</div>
           <div class="update-progress-container">
             <div class="update-progress-bar">
               <div id="updateProgressBar" class="update-progress-fill"></div>
@@ -977,18 +976,24 @@ html, body {
       to { opacity: 1; }
     }
 
+    /* Главное — стеклянный контейнер как сайдбар */
     .update-modal-content {
       position: relative;
       background: rgba(18, 25, 32, 0.95);
-      border-radius: 12px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 20px;
       border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
       width: 90%;
-      max-width: 480px;
+      max-width: 450px;
       padding: 0;
       transform: scale(0.95);
       opacity: 0;
-      transition: all 0.2s ease-out;
+      transition: all 0.3s ease;
+      overflow: hidden;
     }
 
     .update-modal.show .update-modal-content {
@@ -996,23 +1001,25 @@ html, body {
       opacity: 1;
     }
 
+    .update-modal-content:hover {
+      transform: translateY(-8px) scale(1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+
     .update-modal-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 32px 36px 20px;
     }
 
     .update-modal-header h2 {
       margin: 0;
       font-size: 1.4rem;
       font-weight: 600;
+      line-height: 1.2;
       color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 12px;
     }
 
     .update-modal-body {
-      padding: 28px 32px;
+      padding: 0 36px 32px;
     }
 
     .update-text {
@@ -1021,149 +1028,85 @@ html, body {
       font-size: 1rem;
     }
 
-    .update-info {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .update-version {
+    /* Версия и описание в стиле примера */
+    .version {
       font-size: 1.1rem;
+      margin-bottom: 8px;
       color: var(--text);
-      padding: 10px 14px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 8px;
-      border-left: 2px solid var(--accent);
     }
 
-    .update-version strong {
-      color: var(--accent);
+    .version strong {
+      color: #60a5fa;
       font-weight: 600;
     }
 
-    .update-description {
-      font-size: 0.95rem;
+    .description {
       color: var(--sub);
+      font-size: 0.95rem;
     }
 
-    .update-downloading {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .download-details {
+    /* Информация о загрузке */
+    .download-info {
       display: flex;
       justify-content: space-between;
-      font-size: 0.9rem;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      font-size: 0.92rem;
       color: var(--sub);
-      margin-top: 10px;
-      padding: 10px 14px;
-      background: rgba(42, 178, 123, 0.05);
-      border-radius: 8px;
+      margin-bottom: 20px;
     }
 
-    .download-size {
-      color: var(--text);
-      font-weight: 500;
-    }
-
-    .download-speed {
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .update-ready {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .update-ready p:first-child {
-      font-size: 1.1rem;
+    .download-info strong {
       color: var(--text);
     }
 
-    .update-ready strong {
-      color: var(--success);
-      font-weight: 700;
-      text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+    /* Ошибка */
+    .error {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      padding: 18px;
+      border-radius: 12px;
+      font-size: 0.94rem;
+      line-height: 1.5;
     }
 
-    .update-error {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+    .error small {
+      display: block;
+      margin-top: 8px;
+      opacity: 0.8;
     }
 
-    .update-error p:first-child {
-      font-size: 1.1rem;
-      color: var(--text);
-    }
-
-    .error-message {
-      padding: 14px;
-      background: rgba(239, 68, 68, 0.08);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-      border-radius: 10px;
-      color: #ff6b6b;
-      font-size: 0.9rem;
-      font-family: 'Courier New', monospace;
-      max-height: 120px;
-      overflow-y: auto;
-    }
-
-    /* Прогресс-бар в стиле лаунчера */
+    /* Прогресс-бар */
     .update-progress {
-      margin-top: 24px;
+      margin-top: 20px;
     }
 
     .update-stage-text {
-      font-size: 0.9rem;
-      color: var(--accent);
-      margin-bottom: 12px;
-      font-weight: 500;
-      text-align: center;
+      display: none; /* Убираем текст этапа для минимализма */
     }
 
     .update-progress-container {
       display: flex;
-      align-items: center;
-      gap: 14px;
+      flex-direction: column;
+      gap: 10px;
     }
 
     .update-progress-bar {
-      flex: 1;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 6px;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
       overflow: hidden;
       position: relative;
     }
 
     .update-progress-fill {
       height: 100%;
-      background: var(--accent);
-      border-radius: 6px;
+      background: #60a5fa;
+      border-radius: 8px;
       width: 0%;
       transition: width 0.3s ease;
-    }
-
-    .update-progress-percent {
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--sub);
-      min-width: 45px;
-      text-align: right;
-    }
-
-    /* Модальный футер */
-    .update-modal-footer {
-      padding: 20px 32px 28px;
-      border-top: 1px solid rgba(42, 178, 123, 0.1);
-      background: linear-gradient(90deg, var(--accent), var(--progress-fill));
-      border-radius: 4px;
-      transition: width 0.3s ease-out;
       position: relative;
       overflow: hidden;
     }
@@ -1172,34 +1115,28 @@ html, body {
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-      );
-      animation: shimmer 1.5s infinite;
+      left: -100%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: shine 2s infinite;
     }
 
-    @keyframes shimmer {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
+    @keyframes shine {
+      0% { left: -100%; }
+      100% { left: 100%; }
     }
 
     .update-progress-percent {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #60a5fa;
       text-align: center;
-      margin-top: 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--accent);
     }
 
-    /* Кнопки */
+    /* Футер с кнопками */
     .update-modal-footer {
-      padding: 20px 28px 24px;
+      padding: 24px 36px 36px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
 
@@ -1210,47 +1147,45 @@ html, body {
       flex-wrap: wrap;
     }
 
+    /* Кнопки — стеклянные */
     .update-btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      padding: 11px 24px;
+      border-radius: 12px;
       font-weight: 500;
+      font-size: 0.98rem;
       cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      transition: all 0.25s ease;
+      border: none;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       font-family: inherit;
     }
 
-    .update-btn-primary {
-      background: var(--accent);
-      color: white;
-    }
-
-    .update-btn-primary:hover {
-      background: #24a86c;
-      transform: translateY(-1px);
-    }
-
-    .update-btn-primary:active {
-      transform: translateY(0);
-    }
-
     .update-btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--sub);
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     .update-btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
     }
 
-    .update-btn-icon {
-      font-size: 1.1rem;
+    .update-btn-primary {
+      background: #60a5fa;
+      color: white;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    }
+
+    .update-btn-primary:hover {
+      background: #3b82f6;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.45);
+    }
+
+    .update-btn:active {
+      transform: translateY(0);
     }
 
     /* Иконка уведомления об обновлении */
