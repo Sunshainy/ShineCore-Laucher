@@ -1,6 +1,6 @@
 {
   "name": "shinecore-launcher",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "ShineCore Minecraft Launcher - современный лаунчер с красивым UI",
   "main": "src/main.js",
   "scripts": {
@@ -27,12 +27,12 @@
   },
   "dependencies": {
     "adm-zip": "^0.5.16",
-    "electron-log": "^5.0.1"
+    "electron-log": "^5.0.1",
+    "electron-updater": "^6.6.2"
   },
   "devDependencies": {
     "electron": "^33.0.0",
-    "electron-builder": "^25.1.8",
-    "electron-updater": "^6.6.2"
+    "electron-builder": "^25.1.8"
   },
   "engines": {
     "node": ">=18.0.0",
