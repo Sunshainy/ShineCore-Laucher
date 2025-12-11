@@ -21,10 +21,19 @@ class UpdateNotification {
     this.modalTitle = document.getElementById('updateTitle');
     this.modalText = document.getElementById('updateText');
     this.modalButtons = document.getElementById('updateButtons');
+    this.notificationIcon = document.getElementById('updateNotificationIcon');
 
     if (!this.modal) {
       console.error('Update modal not found in DOM');
       return;
+    }
+
+    // Клик по иконке уведомления открывает модальное окно
+    if (this.notificationIcon) {
+      this.notificationIcon.onclick = () => {
+        this.hideNotificationIcon();
+        this.showModal();
+      };
     }
 
     // Подписываемся на события обновления от main процесса
@@ -102,7 +111,10 @@ class UpdateNotification {
     `;
 
     document.getElementById('updateNowBtn').onclick = () => this.startDownload();
-    document.getElementById('updateLaterBtn').onclick = () => this.hideModal();
+    document.getElementById('updateLaterBtn').onclick = () => {
+      this.hideModal();
+      this.showNotificationIcon();
+    };
 
     this.showModal();
   }
@@ -255,6 +267,18 @@ class UpdateNotification {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  }
+
+  showNotificationIcon() {
+    if (this.notificationIcon) {
+      this.notificationIcon.style.display = 'block';
+    }
+  }
+
+  hideNotificationIcon() {
+    if (this.notificationIcon) {
+      this.notificationIcon.style.display = 'none';
+    }
   }
 }
 
