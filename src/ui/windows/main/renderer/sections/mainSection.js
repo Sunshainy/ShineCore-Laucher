@@ -54,10 +54,6 @@ export async function loadMainSection() {
           <span class="info-badge-label">Minecraft</span>
           <span class="info-badge-value">${manifest.minecraft}</span>
         </div>
-        <div class="info-badge">
-          <span class="info-badge-label">Загрузчик</span>
-          <span class="info-badge-value">${manifest.loader === 'none' ? 'Vanilla' : manifest.loader.charAt(0).toUpperCase() + manifest.loader.slice(1)}</span>
-        </div>
       </div>
     `;
     
