@@ -1,6 +1,6 @@
 {
   "name": "shinecore-launcher",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "ShineCore Minecraft Launcher - современный лаунчер с красивым UI",
   "main": "src/main.js",
   "scripts": {
@@ -65,7 +65,7 @@
         }
       ],
       "icon": "src/assets/icon.ico",
-      "artifactName": "ShineCore-Launcher-Setup-${version}.${ext}",
+      "artifactName": "ShineCore-Launcher-Setup.${ext}",
       "requestedExecutionLevel": "asInvoker",
       "publish": ["github"]
     },
