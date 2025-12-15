@@ -32,7 +32,7 @@ class ModpackLauncher {
         }
     }
 
-    async launchFromServer(serverUrl = "be-sunshainy.online:8000") {
+    async launchFromServer(serverUrl = "be-sunshainy.ru:8000") {
         try {
             console.log('\n=== Запуск модпака с сервера ===');
 

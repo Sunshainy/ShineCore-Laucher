@@ -46,7 +46,7 @@ class ModpackHandlers {
 
         // Всегда пробуем актуальные данные с сервера; при ошибке — используем кеш
         try {
-            const url = 'http://be-sunshainy.online:8000/manifest';
+            const url = 'http://be-sunshainy.ru:8000/manifest';
             const DownloadUtil = require('../utils/DownloadUtil');
             const Logger = require('../utils/Logger');
             const downloader = new DownloadUtil(new Logger(this.minecraftDir));
@@ -124,7 +124,7 @@ class ModpackHandlers {
                     }
                 );
 
-                await modpackLauncher.launchFromServer('be-sunshainy.online:8000');
+                await modpackLauncher.launchFromServer('be-sunshainy.ru:8000');
                 return { success: true };
             } catch (err) {
                 this.logger.error('Modpack download error', err);
