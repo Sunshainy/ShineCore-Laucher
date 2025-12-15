@@ -48,7 +48,14 @@ class UpdateHandlers {
         autoUpdater.autoDownload = false;
         autoUpdater.autoInstallOnAppQuit = false;
 
-        console.log('Setting up auto-updater...');
+        // Настройка GitHub провайдера
+        autoUpdater.setFeedURL({
+            provider: 'github',
+            owner: 'Sunshainy',
+            repo: 'ShineCore-Laucher'
+        });
+
+        console.log('Setting up auto-updater with GitHub provider...');
 
         // Проверка обновлений
         autoUpdater.on('checking-for-update', () => {
