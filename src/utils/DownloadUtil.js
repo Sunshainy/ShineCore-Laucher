@@ -57,8 +57,18 @@ class DownloadUtil {
         return new Promise((resolve, reject) => {
             this.ensureDir(path.dirname(filePath));
             const client = this._getRequestModule(url);
+            
+            // Опции для HTTPS запросов
+            const options = { 
+                timeout: 30000
+            };
+            
+            // Если это HTTPS, добавляем опции для сертификатов
+            if (url.startsWith('https://')) {
+                options.rejectUnauthorized = true;
+            }
 
-            client.get(url, { timeout: 30000 }, (response) => {
+            client.get(url, options, (response) => {
                 if ([301, 302, 307, 308].includes(response.statusCode) && response.headers.location) {
                     return this.downloadFile(response.headers.location, filePath)
                         .then(resolve).catch(reject);
@@ -136,7 +146,18 @@ class DownloadUtil {
 
         const data = await new Promise((resolve, reject) => {
             const client = this._getRequestModule(url);
-            client.get(url, { timeout: 30000 }, (response) => {
+            
+            // Опции для HTTPS запросов
+            const options = { 
+                timeout: 30000
+            };
+            
+            // Если это HTTPS, добавляем опции для сертификатов
+            if (url.startsWith('https://')) {
+                options.rejectUnauthorized = true;
+            }
+            
+            client.get(url, options, (response) => {
                 if ([301, 302, 307, 308].includes(response.statusCode) && response.headers.location) {
                     return this.fetchJson(response.headers.location, cacheTtlMs).then(resolve).catch(reject);
                 }

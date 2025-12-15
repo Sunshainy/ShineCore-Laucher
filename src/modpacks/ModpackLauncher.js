@@ -32,13 +32,13 @@ class ModpackLauncher {
         }
     }
 
-    async launchFromServer(serverUrl = "be-sunshainy.ru:8000") {
+    async launchFromServer(serverUrl = "https://api.be-sunshainy.ru") {
         try {
             console.log('\n=== Запуск модпака с сервера ===');
 
             let baseUrl = serverUrl.trim();
             if (!/^https?:\/\//i.test(baseUrl)) {
-                baseUrl = 'http://' + baseUrl.replace(/^\/+/g, '');
+                baseUrl = 'https://' + baseUrl.replace(/^\/+/g, '');
             }
             baseUrl = baseUrl.replace(/\/+$/, '');
 
