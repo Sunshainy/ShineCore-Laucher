@@ -58,14 +58,6 @@ export async function loadMainSection() {
           <span class="info-badge-label">Загрузчик</span>
           <span class="info-badge-value">${manifest.loader === 'none' ? 'Vanilla' : manifest.loader.charAt(0).toUpperCase() + manifest.loader.slice(1)}</span>
         </div>
-        <div class="info-badge">
-          <span class="info-badge-label">Java</span>
-          <span class="info-badge-value">${manifest.java_version}</span>
-        </div>
-        <div class="info-badge">
-          <span class="info-badge-label">Файлов</span>
-          <span class="info-badge-value">${manifest.files?.length || 0}</span>
-        </div>
       </div>
     `;
     
